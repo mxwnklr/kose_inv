@@ -1,0 +1,162 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum InvoiceStatus {
+  draft
+  issued
+  paid
+  cancelled
+}
+
+enum InvoiceLanguage {
+  de
+  en
+}
+
+enum TaxMode {
+  standard
+  kleinunternehmer
+}
+
+enum PriceInputMode {
+  net
+  gross
+}
+
+enum ExportKind {
+  pdf
+  xrechnung
+}
+
+enum ExportValidationState {
+  passed
+  failed
+  unavailable
+}
+
+model BusinessProfile {
+  id                 String   @id @default(cuid())
+  legalName          String
+  street             String
+  postalCode         String
+  city               String
+  countryCode        String   @default("DE")
+  email              String
+  phone              String
+  vatId              String?
+  taxNumber          String?
+  isKleinunternehmer Boolean  @default(false)
+  iban               String
+  bic                String
+  bankName           String
+  defaultPaymentDays Int      @default(14)
+  invoicePrefix      String   @default("INV")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Contact {
+  id                 String   @id @default(cuid())
+  displayName        String
+  companyName        String
+  street             String
+  postalCode         String
+  city               String
+  countryCode        String   @default("DE")
+  email              String
+  phone              String
+  vatId              String?
+  languagePreference InvoiceLanguage @default(de)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  invoices           Invoice[]
+}
+
+model Invoice {
+  id                         String   @id @default(cuid())
+  invoiceNumber              String   @unique
+  status                     InvoiceStatus @default(draft)
+  issueDate                  DateTime
+  serviceDate                DateTime
+  currency                   String   @default("EUR")
+  language                   InvoiceLanguage @default(de)
+  taxMode                    TaxMode @default(standard)
+
+  senderLegalName            String
+  senderStreet               String
+  senderPostalCode           String
+  senderCity                 String
+  senderCountryCode          String
+  senderEmail                String
+  senderPhone                String
+  senderVatId                String?
+  senderTaxNumber            String?
+  senderIsKleinunternehmer   Boolean @default(false)
+  senderIban                 String
+  senderBic                  String
+  senderBankName             String
+
+  recipientDisplayName       String
+  recipientCompanyName       String
+  recipientStreet            String
+  recipientPostalCode        String
+  recipientCity              String
+  recipientCountryCode       String
+  recipientEmail             String
+  recipientPhone             String
+  recipientVatId             String?
+
+  netTotal                   Decimal @default(0)
+  vatTotal                   Decimal @default(0)
+  grossTotal                 Decimal @default(0)
+
+  paymentTermDays            Int @default(14)
+  dueDate                    DateTime
+  note                       String
+
+  contactId                  String?
+  contact                    Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  items                      InvoiceItem[]
+  exports                    InvoiceExport[]
+
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+}
+
+model InvoiceItem {
+  id              String   @id @default(cuid())
+  invoiceId       String
+  invoice         Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  position        Int
+  description     String
+  quantity        Decimal
+  unit            String
+  unitPriceInput  Decimal
+  priceInputMode  PriceInputMode @default(net)
+  vatRate         Int
+
+  lineNet         Decimal
+  lineVat         Decimal
+  lineGross       Decimal
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model InvoiceExport {
+  id                String   @id @default(cuid())
+  invoiceId         String
+  invoice           Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  kind              ExportKind
+  validationState   ExportValidationState @default(unavailable)
+  validationLog     String?
+  createdAt         DateTime @default(now())
+}
