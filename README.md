@@ -17,6 +17,37 @@ Attio-inspired, local-first invoice web app for the German market with:
 - Tailwind CSS
 - Playwright (for PDF generation)
 
+
+## Project Status
+
+> **Current status:** local-first prototype (not deployed as a public production app).
+
+This project is actively developed and tested locally.
+For now, the public showcase lives on my portfolio as curated mockups/screens instead of a live deployment.
+
+## Portfolio Showcase
+
+- Portfolio: https://kose.design
+- Repository: https://github.com/mxwnklr/kose_inv
+
+### Showcase Notes
+
+- Focus on UI/UX, invoice flow, and feature depth
+- No public API endpoint is exposed
+- Production hardening/auth is planned for a later stage
+
+## Screenshots / Demo
+
+_Add your media assets in this section (recommended: 2–4 screenshots + 1 short GIF)._
+
+Example:
+
+```md
+![Invoice Studio — Editor](./docs/screens/editor.png)
+![Invoice Studio — Contacts](./docs/screens/contacts.png)
+![Invoice Studio — History](./docs/screens/history.png)
+```
+
 ## Quick Start
 
 1. Install dependencies
